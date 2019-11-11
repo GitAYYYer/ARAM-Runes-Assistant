@@ -1,5 +1,5 @@
 # ARAM-Runes-Assistant
-A very basic runes assistant that references to Mobafire's interactive runes page, for League of Legends.
+A very basic runes assistant that references to Mobafire's interactive runes page, for League of Legends :) 
 
 ## Setup
 In 'ARAM-Runes-Assistant.py', there are two variables which might require changing to work.  
