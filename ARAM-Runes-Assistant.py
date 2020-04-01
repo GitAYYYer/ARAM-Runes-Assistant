@@ -3,6 +3,8 @@
 # https://www.mobafire.com/league-of-legends/rune-page-planner#&rune=Precision:1:16:19:22::Inspiration:52:56:::Shards:1:1:4
 import xlrd
 import webbrowser
+import win32gui
+import win32con
 
 # IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Give the file path of the file you want to read from:
@@ -14,6 +16,12 @@ chromePath = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s"
 # To open Excel Workbook 
 workbook = xlrd.open_workbook(fileName) 
 sheet = workbook.sheet_by_name("Champion Runes") 
+
+def getWindowText(hwnd):
+    buf_size = 1 + win32gui.SendMessage(hwnd, win32con.WM_GETTEXTLENGTH, 0, 0)
+    buf = win32gui.PyMakeBuffer(buf_size)
+    win32gui.SendMessage(hwnd, win32con.WM_GETTEXT, buf_size, buf)
+    return str(buf)
 
 if __name__ == "__main__":
     while True:
@@ -60,6 +68,10 @@ if __name__ == "__main__":
                     stat1 = int(sheet.cell_value(i, 9))
                     stat2 = int(sheet.cell_value(i, 10))
                     stat3 = int(sheet.cell_value(i, 11))
+
+                    # Gets chrome tabs
+                    hwnd = win32gui.GetForegroundWindow()
+                    omniboxHwnd = win32gui.FindWindowEx(hwnd, 0, 'Chrome_OmniboxView', None)
 
                     baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
                     newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
