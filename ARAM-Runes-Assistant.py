@@ -8,10 +8,10 @@ import win32con
 
 # IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Give the file path of the file you want to read from:
-fileName = "Champion-Runes.xlsx"
+fileName = "Champion-Runes-Old-Format.xls"
 # Give the file path of your Chrome:
 # If you're using windows, make sure to use forward slashes '/' and to append ' %s' at the end of your path.
-chromePath = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s"
+chromePath = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
 
 # To open Excel Workbook 
 workbook = xlrd.open_workbook(fileName) 
@@ -26,7 +26,7 @@ def getWindowText(hwnd):
 if __name__ == "__main__":
     while True:
         # Define all necessary variables to place into URL.
-        championNameInput = raw_input("Enter your champion name, or 'exit' to close this window. \n").lower()
+        championNameInput = input("Enter your champion name, or 'exit' to close this window. \n").lower()
         if (championNameInput == "exit"):
             print("Bye bye!")
             exit()
