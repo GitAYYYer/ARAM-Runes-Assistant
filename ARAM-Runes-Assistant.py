@@ -10,6 +10,7 @@ import pygame
 import pygame_gui
 from pygame.rect import Rect
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
+from button import Button
 
 # Read config JSON
 with open('config.json') as f:
@@ -33,7 +34,9 @@ def getWindowText(hwnd):
 
 def mainLoop(running):
     while running:
+        screen.blit(background, (0, 0))
         delta = clock.tick(60)/1000.0
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -43,18 +46,27 @@ def mainLoop(running):
                     if event.ui_element == text_input:
                         getRunes(event.text)
 
+            for btn in buttons:
+                msg = btn.eventHandler(event)
+
+                if msg == "aurelion sol":
+                    print(msg)
+                    getRunes(msg)
+
             manager.process_events(event)
 
+        for btn in buttons:
+            btn.draw(screen)
+
         manager.update(delta)
-        screen.blit(background, (0, 0))
         manager.draw_ui(screen)
 
         pygame.display.update()
 
 def initPyGame():
     # Load in config vars
-    width = config["screenWidth"]
-    height = config["screenHeight"]
+    screenWidth = config["screenWidth"]
+    screenHeight = config["screenHeight"]
     backgroundColour = config["backgroundColour"]
 
     pygame.init()
@@ -63,17 +75,17 @@ def initPyGame():
 
     # Create Window
     global screen
-    screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((screenWidth, screenHeight))
     pygame.display.set_caption("Duc's ARAM Assistant")
 
     # Style window
     global background 
-    background = pygame.Surface((width, height))
+    background = pygame.Surface((screenWidth, screenHeight))
     background.fill(pygame.Color(backgroundColour))
 
     # UI Manager
     global manager
-    manager = pygame_gui.UIManager((width, height))
+    manager = pygame_gui.UIManager((screenWidth, screenHeight), 'theme.json')
 
     # Time deltas, not sure if needed in my application.
     global clock
@@ -81,7 +93,17 @@ def initPyGame():
 
     # Search Box
     global text_input
-    text_input = UITextEntryLine(relative_rect=Rect(20, 20, 300, 100), manager=manager)
+    text_input_left = 20
+    text_input_top = 20
+    text_input_width = (screenWidth - (text_input_left*2))/2
+    text_input_height = 200.0
+    text_input = UITextEntryLine(relative_rect=Rect(text_input_left, text_input_top, text_input_width, text_input_height), manager=manager)
+
+    # Generate buttons/portraits for all champions
+    global buttons
+    buttons = []
+    btn = Button("champions/Aurelion Sol.png", (40, 40), (60, 60))
+    buttons.append(btn)
 
 
 def getRunes(championNameInput):
@@ -148,7 +170,7 @@ def getRunes(championNameInput):
             print("No close match could be found. Try typing just the champion name.")
 
 if __name__ == "__main__":
-    # getRunes()
+    # getRunes("Aatrox")
     initPyGame()
     running = True
     mainLoop(running)
