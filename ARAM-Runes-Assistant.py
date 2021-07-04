@@ -8,6 +8,7 @@ import win32con
 import json
 import pygame
 import pygame_gui
+from pygame.rect import Rect
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 
 # Read config JSON
@@ -36,6 +37,11 @@ def mainLoop(running):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+                    if event.ui_element == text_input:
+                        getRunes(event.text)
 
             manager.process_events(event)
 
@@ -73,74 +79,73 @@ def initPyGame():
     global clock
     clock = pygame.time.Clock()
 
+    # Search Box
+    global text_input
+    text_input = UITextEntryLine(relative_rect=Rect(20, 20, 300, 100), manager=manager)
 
-def getRunes():
-    while True:
-        # Define all necessary variables to place into URL.
-        championNameInput = input("Enter your champion name, or 'exit' to close this window. ").lower()
-        if (championNameInput == "exit"):
-            print("Bye bye!")
-            exit()
-        primaryTree = ""
-        keyStone = ""
-        topRune = ""
-        midRune = ""
-        bottomRune = ""
-        secondaryTree = ""
-        secondaryR1 = ""
-        secondaryR2 = ""
-        stat1 = ""
-        stat2 = ""
-        stat3 = ""
 
-        # If the input matches a value in the spreadsheet, set to true. If still false after going through spreadsheet,
-        # then find the closest matches and print them to user.
-        championFound = False
-        closestMatches = []
+def getRunes(championNameInput):
+    # Define all necessary variables to place into URL.
+    primaryTree = ""
+    keyStone = ""
+    topRune = ""
+    midRune = ""
+    bottomRune = ""
+    secondaryTree = ""
+    secondaryR1 = ""
+    secondaryR2 = ""
+    stat1 = ""
+    stat2 = ""
+    stat3 = ""
 
-        for i in range (1, sheet.nrows):
-            championNameSpreadsheet = sheet.cell_value(i, 0).lower()
+    # If the input matches a value in the spreadsheet, set to true. If still false after going through spreadsheet,
+    # then find the closest matches and print them to user.
+    championFound = False
+    closestMatches = []
 
-            # if the input is a substring of the spreadsheet champion name, then check if the values are equal (in which case, you give the runes for that champion).
-            if (championNameInput in championNameSpreadsheet):
-                # i refers to row number, the second value refers to the column.
-                # Columns are in the same order as variables above.
-                # 0 = Champion Name, 1 = Primary Tree, etc.
-                if (championNameSpreadsheet == championNameInput):
-                    championFound = True
-                    primaryTree = sheet.cell_value(i, 1)
-                    keyStone = int(sheet.cell_value(i, 2))
-                    topRune = int(sheet.cell_value(i, 3))
-                    midRune = int(sheet.cell_value(i, 4))
-                    bottomRune = int(sheet.cell_value(i, 5))
-                    secondaryTree = sheet.cell_value(i, 6)
-                    secondaryR1 = int(sheet.cell_value(i, 7))
-                    secondaryR2 = int(sheet.cell_value(i, 8))
-                    stat1 = int(sheet.cell_value(i, 9))
-                    stat2 = int(sheet.cell_value(i, 10))
-                    stat3 = int(sheet.cell_value(i, 11))
+    for i in range (1, sheet.nrows):
+        championNameSpreadsheet = sheet.cell_value(i, 0).lower()
 
-                    # Gets chrome tabs
-                    hwnd = win32gui.GetForegroundWindow()
-                    omniboxHwnd = win32gui.FindWindowEx(hwnd, 0, 'Chrome_OmniboxView', None)
+        # if the input is a substring of the spreadsheet champion name, then check if the values are equal (in which case, you give the runes for that champion).
+        if (championNameInput in championNameSpreadsheet):
+            # i refers to row number, the second value refers to the column.
+            # Columns are in the same order as variables above.
+            # 0 = Champion Name, 1 = Primary Tree, etc.
+            if (championNameSpreadsheet == championNameInput):
+                championFound = True
+                primaryTree = sheet.cell_value(i, 1)
+                keyStone = int(sheet.cell_value(i, 2))
+                topRune = int(sheet.cell_value(i, 3))
+                midRune = int(sheet.cell_value(i, 4))
+                bottomRune = int(sheet.cell_value(i, 5))
+                secondaryTree = sheet.cell_value(i, 6)
+                secondaryR1 = int(sheet.cell_value(i, 7))
+                secondaryR2 = int(sheet.cell_value(i, 8))
+                stat1 = int(sheet.cell_value(i, 9))
+                stat2 = int(sheet.cell_value(i, 10))
+                stat3 = int(sheet.cell_value(i, 11))
 
-                    baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
-                    newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
-                    webbrowser.get(chromePath).open(newURL)
-                # else, the input was a substring but not a full match, meaning there are multiple rune builds that can be returned.
-                else:
-                    closestMatches.append(championNameSpreadsheet)
-            
-        # Print the closest matches.
-        if (championFound == False):
-            print("Couldn't find a match.")
-            if (len(closestMatches) > 0):
-                print("Closest matches:")
-                for build in closestMatches:
-                    print(build)
-                print("")
+                # Gets chrome tabs
+                hwnd = win32gui.GetForegroundWindow()
+                omniboxHwnd = win32gui.FindWindowEx(hwnd, 0, 'Chrome_OmniboxView', None)
+
+                baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
+                newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
+                webbrowser.get(chromePath).open(newURL)
+            # else, the input was a substring but not a full match, meaning there are multiple rune builds that can be returned.
             else:
-                print("No close match could be found. Try typing just the champion name.")
+                closestMatches.append(championNameSpreadsheet)
+        
+    # Print the closest matches.
+    if (championFound == False):
+        print("Couldn't find a match.")
+        if (len(closestMatches) > 0):
+            print("Closest matches:")
+            for build in closestMatches:
+                print(build)
+            print("")
+        else:
+            print("No close match could be found. Try typing just the champion name.")
 
 if __name__ == "__main__":
     # getRunes()
