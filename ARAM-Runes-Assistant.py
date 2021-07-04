@@ -5,13 +5,18 @@ import xlrd
 import webbrowser
 import win32gui
 import win32con
+import json
+import pygame
 
-# IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Read config JSON
+with open('config.json') as f:
+    config = json.load(f)
+
 # Give the file path of the file you want to read from:
-fileName = "Champion-Runes-Old-Format.xls"
+fileName = config['fileName']
 # Give the file path of your Chrome:
 # If you're using windows, make sure to use forward slashes '/' and to append ' %s' at the end of your path.
-chromePath = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
+chromePath = config['chromePath']
 
 # To open Excel Workbook 
 workbook = xlrd.open_workbook(fileName) 
@@ -23,10 +28,24 @@ def getWindowText(hwnd):
     win32gui.SendMessage(hwnd, win32con.WM_GETTEXT, buf_size, buf)
     return str(buf)
 
-if __name__ == "__main__":
+def initPyGame():
+    pygame.init()
+    # Set Logo
+
+    # Create Window
+    screen = pygame.display.set_mode((800, 450))
+
+    # Define running status
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+def getRunes():
     while True:
         # Define all necessary variables to place into URL.
-        championNameInput = input("Enter your champion name, or 'exit' to close this window. \n").lower()
+        championNameInput = input("Enter your champion name, or 'exit' to close this window. ").lower()
         if (championNameInput == "exit"):
             print("Bye bye!")
             exit()
@@ -90,3 +109,8 @@ if __name__ == "__main__":
                 print("")
             else:
                 print("No close match could be found. Try typing just the champion name.")
+
+if __name__ == "__main__":
+    getRunes()
+    # print('hi')
+    # initPyGame()

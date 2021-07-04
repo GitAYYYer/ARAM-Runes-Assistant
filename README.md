@@ -3,7 +3,7 @@ A very basic runes assistant that references to Mobafire's interactive runes pag
 Currently this application is run using the python command rather than having a .exe, as creating a .exe for every change I make is annoying (and also out of my scope).
 
 ## Setup
-In 'ARAM-Runes-Assistant.py', there are two variables which might require changing to work.  
+In 'ARAM-Runes-Assistant.py', there are two variables which might require changing to work. You change these in the config.json file.
 - 'fileName' is the path to your .xlsx file which holds all champions and their runes.  
 - 'chromePath' is the path to your chrome.exe. NOTE: When changing this to a different path, make sure to always append a space and '%s' to the end of the path.  
 
