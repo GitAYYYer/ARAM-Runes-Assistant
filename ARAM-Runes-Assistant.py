@@ -7,6 +7,8 @@ import win32gui
 import win32con
 import json
 import pygame
+import pygame_gui
+from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 
 # Read config JSON
 with open('config.json') as f:
@@ -18,9 +20,9 @@ fileName = config['fileName']
 # If you're using windows, make sure to use forward slashes '/' and to append ' %s' at the end of your path.
 chromePath = config['chromePath']
 
-# To open Excel Workbook 
+# Open Excel Workbook 
 workbook = xlrd.open_workbook(fileName) 
-sheet = workbook.sheet_by_name("Champion Runes") 
+sheet = workbook.sheet_by_name("Champion Runes")
 
 def getWindowText(hwnd):
     buf_size = 1 + win32gui.SendMessage(hwnd, win32con.WM_GETTEXTLENGTH, 0, 0)
@@ -28,19 +30,49 @@ def getWindowText(hwnd):
     win32gui.SendMessage(hwnd, win32con.WM_GETTEXT, buf_size, buf)
     return str(buf)
 
-def initPyGame():
-    pygame.init()
-    # Set Logo
-
-    # Create Window
-    screen = pygame.display.set_mode((800, 450))
-
-    # Define running status
-    running = True
+def mainLoop(running):
     while running:
+        delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            manager.process_events(event)
+
+        manager.update(delta)
+        screen.blit(background, (0, 0))
+        manager.draw_ui(screen)
+
+        pygame.display.update()
+
+def initPyGame():
+    # Load in config vars
+    width = config["screenWidth"]
+    height = config["screenHeight"]
+    backgroundColour = config["backgroundColour"]
+
+    pygame.init()
+    # Set Logo
+    # ...
+
+    # Create Window
+    global screen
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Duc's ARAM Assistant")
+
+    # Style window
+    global background 
+    background = pygame.Surface((width, height))
+    background.fill(pygame.Color(backgroundColour))
+
+    # UI Manager
+    global manager
+    manager = pygame_gui.UIManager((width, height))
+
+    # Time deltas, not sure if needed in my application.
+    global clock
+    clock = pygame.time.Clock()
+
 
 def getRunes():
     while True:
@@ -111,6 +143,7 @@ def getRunes():
                 print("No close match could be found. Try typing just the champion name.")
 
 if __name__ == "__main__":
-    getRunes()
-    # print('hi')
-    # initPyGame()
+    # getRunes()
+    initPyGame()
+    running = True
+    mainLoop(running)

@@ -1,4 +1,7 @@
 {
     "fileName": "C:/Users/DucH/OneDrive/Desktop/Projects/ARAM-Runes-Assistant/Champion-Runes-Old-Format.xls",
-    "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
+    "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe %s",
+    "screenWidth": 800,
+    "screenHeight": 450,
+    "backgroundColour": "#AAAAAA"
 }
