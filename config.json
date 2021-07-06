@@ -3,5 +3,7 @@
     "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe %s",
     "screenWidth": 800,
     "screenHeight": 450,
+    "championIconLength": 60,
+    "championIconGap": 10,
     "backgroundColour": "#AAAAAA"
 }

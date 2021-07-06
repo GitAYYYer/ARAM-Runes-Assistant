@@ -1,14 +1,14 @@
 import pygame
 
 class Button(object):
-    def __init__(self, img, position, size):
+    def __init__(self, img, rect):
         # load image onto button
         self.img = pygame.image.load(img)
         self.img.convert()
         self.img = pygame.transform.rotozoom(self.img, 0, 0.5)
 
         # get image size and position
-        self.rect = pygame.Rect(position, size)
+        self.rect = rect
 
 
     def draw(self, screen):

@@ -11,6 +11,7 @@ import pygame_gui
 from pygame.rect import Rect
 from pygame_gui.elements.ui_text_entry_line import UITextEntryLine
 from button import Button
+from scrollbar import ScrollBar
 
 # Read config JSON
 with open('config.json') as f:
@@ -54,12 +55,16 @@ def mainLoop(running):
                     getRunes(msg)
 
             manager.process_events(event)
+            scrollbar.event_handler(event)
 
         for btn in buttons:
             btn.draw(screen)
 
         manager.update(delta)
         manager.draw_ui(screen)
+        scrollbar.update()
+        screen.blit(background, (0, scrollbar.y_axis))
+        scrollbar.draw(screen)
 
         pygame.display.update()
 
@@ -68,6 +73,8 @@ def initPyGame():
     screenWidth = config["screenWidth"]
     screenHeight = config["screenHeight"]
     backgroundColour = config["backgroundColour"]
+    iconLength = config['championIconLength']
+    iconsGap = config['championIconGap']
 
     pygame.init()
     # Set Logo
@@ -85,7 +92,7 @@ def initPyGame():
 
     # UI Manager
     global manager
-    manager = pygame_gui.UIManager((screenWidth, screenHeight), 'theme.json')
+    manager = pygame_gui.UIManager((screenWidth, screenHeight))
 
     # Time deltas, not sure if needed in my application.
     global clock
@@ -99,11 +106,31 @@ def initPyGame():
     text_input_height = 200.0
     text_input = UITextEntryLine(relative_rect=Rect(text_input_left, text_input_top, text_input_width, text_input_height), manager=manager)
 
+    # Generate all Rects under search bar
+    global championsContainerRect
+    global championRects
+    distOffset = iconLength + iconsGap
+    nRows = 30
+    nCols = 5
+    championsContainerRect = Rect(text_input_left, 60, (iconLength*nCols) + iconsGap * (nCols - 1), (iconLength*nRows) + iconsGap * (nRows - 1))
+    championRects = []
+    for i in range(nRows):
+        for j in range(nCols):
+            championRects.append(Rect(text_input_left + j*distOffset, (text_input_top*2) + i*distOffset, iconLength, iconLength))
+
     # Generate buttons/portraits for all champions
     global buttons
     buttons = []
-    btn = Button("champions/Aurelion Sol.png", (40, 40), (60, 60))
-    buttons.append(btn)
+    for rect in championRects:
+        btn = Button("assets/champions/Aurelion Sol.png", rect)
+        buttons.append(btn)
+
+    # Scrollbar, make it here to make it only once
+    global scrollbar
+    scrollbar = ScrollBar((iconLength*nRows) + iconsGap * (nRows - 1))
+
+
+    
 
 
 def getRunes(championNameInput):
