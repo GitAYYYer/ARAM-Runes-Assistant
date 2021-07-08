@@ -5,6 +5,29 @@ global scrollAreaWidth, scrollAreaHeight
 scrollAreaWidth = 530
 scrollAreaHeight = 540
 
+class ChampionSearchArea(QtWidgets.QScrollArea):
+    def __init__(self, parent):
+        super(ChampionSearchArea, self).__init__(parent)
+        self.setObjectName("scrollArea")
+        self.setGeometry(QtCore.QRect(10, 50, scrollAreaWidth, scrollAreaHeight))
+        self.setWidgetResizable(False)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 0))
+
+        self.gridLayoutWidget = QtWidgets.QWidget(self.scrollAreaWidgetContents)
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 50, 0))
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.setWidget(self.scrollAreaWidgetContents)
+
+    def addWidget(self, widget, row, col):
+        self.gridLayout.addWidget(widget, row, col, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, filterChampions, getRunes):
         MainWindow.setObjectName("Duc's ARAM Assistant")
@@ -24,22 +47,7 @@ class Ui_MainWindow(object):
         font.setPointSize(16)
 
         # ScrollArea, and the gridlayout which goes inside the scroll area.
-        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
-        self.scrollArea.setObjectName("scrollArea")
-        self.scrollArea.setGeometry(QtCore.QRect(10, 50, scrollAreaWidth, scrollAreaHeight))
-        self.scrollArea.setWidgetResizable(False)
-        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 0))
-
-        self.gridLayoutWidget = QtWidgets.QWidget(self.scrollAreaWidgetContents)
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 50, 0))
-        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea = ChampionSearchArea(self.centralwidget)
 
         # LineEdit, basically the champion search box
         self.championInput = QtWidgets.QLineEdit(self.centralwidget)
@@ -64,7 +72,6 @@ class Ui_MainWindow(object):
         # Show all champions on startup
         self.handleInputChange("")
 
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -77,8 +84,8 @@ class Ui_MainWindow(object):
         filteredChampions = self.filterChampions(input)
 
         # Clear current champions in layout
-        for i in reversed(range(self.gridLayout.count())):
-            self.gridLayout.itemAt(i).widget().setParent(None)
+        for i in reversed(range(self.scrollArea.gridLayout.count())):
+            self.scrollArea.gridLayout.itemAt(i).widget().setParent(None)
 
         # If no champions filtered, just return
         if len(filteredChampions) == 0:
@@ -91,8 +98,8 @@ class Ui_MainWindow(object):
         totalRows = int(math.ceil(len(filteredChampions) / totalColumns))
 
         # Expand height of scrollarea and gridlayout to match number of champions
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 130*totalRows))
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 49, 90*totalRows))
+        self.scrollArea.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 130*totalRows))
+        self.scrollArea.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 49, 90*totalRows))
 
         currentRow = 0
         currentCol = 0
@@ -108,8 +115,7 @@ class Ui_MainWindow(object):
             
             pixmap = QtGui.QPixmap("assets/champions/{0}Square.png".format(championName))
             btn = ChampionButton(champ, self.getRunes, pixmap)
-            btn.sizePolicy().setHorizontalStretch(1)
-            self.gridLayout.addWidget(btn, currentRow, currentCol, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
+            self.scrollArea.addWidget(btn, currentRow, currentCol)
             currentCol += 1
 
             # When finishing a row, increment counters and create the next row to be labels for each champion's name
@@ -117,7 +123,7 @@ class Ui_MainWindow(object):
                 currentCol = 0
                 # Add labels
                 for currentChampion in currentChampionRow:
-                    self.gridLayout.addWidget(QtWidgets.QLabel(currentChampion), currentRow + 1, currentCol, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
+                    self.scrollArea.addWidget(QtWidgets.QLabel(currentChampion), currentRow + 1, currentCol)
                     currentCol += 1
 
                 currentChampionRow.clear()
@@ -127,7 +133,7 @@ class Ui_MainWindow(object):
         # For the last row, add the labels
         currentCol = 0
         for currentChampion in currentChampionRow:
-            self.gridLayout.addWidget(QtWidgets.QLabel(currentChampion), currentRow + 1, currentCol, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
+            self.scrollArea.addWidget(QtWidgets.QLabel(currentChampion), currentRow + 1, currentCol)
             currentCol += 1
 
     def handleInputEnter(self, input):
