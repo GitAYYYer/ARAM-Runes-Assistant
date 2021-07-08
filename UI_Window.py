@@ -28,6 +28,11 @@ class ChampionSearchArea(QtWidgets.QScrollArea):
     def addWidget(self, widget, row, col):
         self.gridLayout.addWidget(widget, row, col, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
 
+    # Used when filtering view to match number of rows needed
+    def updateGeometry(self, totalRows):
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 130*totalRows))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 49, 90*totalRows))
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, filterChampions, getRunes):
         MainWindow.setObjectName("Duc's ARAM Assistant")
@@ -37,20 +42,20 @@ class Ui_MainWindow(object):
         self.filterChampions = filterChampions
         self.getRunes = getRunes
 
-        # Central, needed for some reason.
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        MainWindow.setCentralWidget(self.centralwidget)
+        # Central for when choosing runes
+        self.centralwidgetRunes = QtWidgets.QWidget(MainWindow)
+        self.centralwidgetRunes.setObjectName("centralwidget")
+        MainWindow.setCentralWidget(self.centralwidgetRunes)
 
         # Styling
         font = QtGui.QFont()
         font.setPointSize(16)
 
         # ScrollArea, and the gridlayout which goes inside the scroll area.
-        self.scrollArea = ChampionSearchArea(self.centralwidget)
+        self.scrollArea = ChampionSearchArea(self.centralwidgetRunes)
 
         # LineEdit, basically the champion search box
-        self.championInput = QtWidgets.QLineEdit(self.centralwidget)
+        self.championInput = QtWidgets.QLineEdit(self.centralwidgetRunes)
         self.championInput.setObjectName("championInput")
         self.championInput.setGeometry(QtCore.QRect(10, 10, 241, 31))
         self.championInput.setFont(font)
@@ -96,10 +101,7 @@ class Ui_MainWindow(object):
         # totalRows = int(math.ceil(len(filteredChampions) / float(totalColumns)))
         totalColumns = 7
         totalRows = int(math.ceil(len(filteredChampions) / totalColumns))
-
-        # Expand height of scrollarea and gridlayout to match number of champions
-        self.scrollArea.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 130*totalRows))
-        self.scrollArea.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 49, 90*totalRows))
+        self.scrollArea.updateGeometry(totalRows)
 
         currentRow = 0
         currentCol = 0

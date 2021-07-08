@@ -73,11 +73,6 @@ def getRunes(championNameInput):
     stat2 = ""
     stat3 = ""
 
-    # If the input matches a value in the spreadsheet, set to true. If still false after going through spreadsheet,
-    # then find the closest matches and print them to user.
-    championFound = False
-    closestMatches = []
-
     for i in range (1, sheet.nrows):
         championNameSpreadsheet = sheet.cell_value(i, 0).lower()
 
@@ -107,21 +102,7 @@ def getRunes(championNameInput):
                 baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
                 newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
                 webbrowser.get(chromePath).open(newURL)
-            # else, the input was a substring but not a full match, meaning there are multiple rune builds that can be returned.
-            else:
-                closestMatches.append(championNameSpreadsheet)
         
-    # Print the closest matches.
-    if (championFound == False):
-        print("Couldn't find a match.")
-        if (len(closestMatches) > 0):
-            print("Closest matches:")
-            for build in closestMatches:
-                print(build)
-            print("")
-        else:
-            print("No close match could be found. Try typing just the champion name.")
-
 if __name__ == '__main__':
     # First, load all the champions
     loadChampions()
