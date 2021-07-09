@@ -1,9 +1,24 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import math
 
+# The current champion that the user has selected (through the getRunes method)
+global currentChampion
+currentChampion = ""
+
+global windowWidth, windowHeight
+windowWidth = 1000
+windowHeight = 800
+
 global scrollAreaWidth, scrollAreaHeight
-scrollAreaWidth = 530
-scrollAreaHeight = 540
+scrollAreaWidth = windowWidth * 0.6
+scrollAreaHeight = windowHeight - 60
+
+class RunesArea(QtWidgets.QGroupBox):
+    def __init__(self, parent):
+        super(RunesArea, self).__init__(parent)
+        self.setObjectName("runesArea")
+        self.setGeometry(QtCore.QRect(scrollAreaWidth + 20, windowHeight*0.6, (windowWidth*0.4)-30, windowHeight*0.4-10))
+        self.keystone = QtWidgets.QLabel()
 
 class ChampionSearchArea(QtWidgets.QScrollArea):
     def __init__(self, parent):
@@ -36,7 +51,7 @@ class ChampionSearchArea(QtWidgets.QScrollArea):
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, filterChampions, getRunes):
         MainWindow.setObjectName("Duc's ARAM Assistant")
-        MainWindow.resize(1000, 600)
+        MainWindow.resize(windowWidth, windowHeight)
 
         # Helper funcs that use funcs from other file
         self.filterChampions = filterChampions
@@ -62,6 +77,9 @@ class Ui_MainWindow(object):
         self.championInput.setClearButtonEnabled(True)
         self.championInput.textChanged.connect(lambda: self.handleInputChange(self.championInput.text()))
         self.championInput.returnPressed.connect(lambda: self.handleInputEnter(self.championInput.text()))
+
+        # GroupBox area, used to show runes itself
+        self.groupbox = RunesArea(self.centralwidgetRunes)
 
         # MenuBar, needed for some reason.
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -139,7 +157,23 @@ class Ui_MainWindow(object):
             currentCol += 1
 
     def handleInputEnter(self, input):
-        self.getRunes(input)
+        currentChampion = self.getRunes(input)
+        print(currentChampion)
+
+class RuneIcon(QtWidgets.QLabel):
+    def __init__(self, parent):
+        super(RuneIcon, self).__init__(parent)
+        self.pixmap = None
+
+    def changeImage(self, pixmap):
+        self.pixmap = pixmap
+
+    def paintEvent(self, event):
+        painter = QtGui.QPainter(self)
+        painter.drawPixmap(self.rect(), self.pixmap)
+
+    def sizeHint(self):
+        return self.pixmap.size()
         
 class ChampionButton(QtWidgets.QPushButton):
     def __init__(self, champion, getRunes, pixmap, parent=None):

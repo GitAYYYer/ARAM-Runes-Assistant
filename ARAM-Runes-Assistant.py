@@ -82,7 +82,6 @@ def getRunes(championNameInput):
             # Columns are in the same order as variables above.
             # 0 = Champion Name, 1 = Primary Tree, etc.
             if (championNameSpreadsheet == championNameInput):
-                championFound = True
                 primaryTree = sheet.cell_value(i, 1)
                 keyStone = int(sheet.cell_value(i, 2))
                 topRune = int(sheet.cell_value(i, 3))
@@ -102,6 +101,9 @@ def getRunes(championNameInput):
                 baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
                 newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
                 webbrowser.get(chromePath).open(newURL)
+
+                return championNameInput
+    return None
         
 if __name__ == '__main__':
     # First, load all the champions
