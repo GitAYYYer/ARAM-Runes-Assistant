@@ -247,6 +247,7 @@ class ChampionButton(QtWidgets.QPushButton):
 
         self.setText(champion)
         self.setToolTip(champion)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.clicked.connect(self.handleClick)
         self.setFixedWidth(self.length)
         self.setFixedHeight(self.length)
