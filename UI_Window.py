@@ -21,6 +21,9 @@ class RunesArea(QtWidgets.QGroupBox):
         self._rect = QtCore.QRect(scrollAreaWidth + 20, windowHeight * 0.5, self.width, self.height)
         self.setGeometry(self._rect)
 
+        # Styling
+        self.setStyleSheet("QGroupBox#runesArea { border: 1px solid grey; }")
+
         # PrimaryLayout is the vertical which contains primary runes, Secondary is for secondary runes + the stat runes
         self.primaryLayoutWidget = QtWidgets.QWidget(self)
         self.primaryLayoutWidget.setObjectName("primaryLayoutWidget")
