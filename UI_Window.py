@@ -1,7 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import math
 
-# The current champion that the user has selected (through the getRunes method)
 global currentChampion
 currentChampion = ""
 
@@ -17,8 +16,51 @@ class RunesArea(QtWidgets.QGroupBox):
     def __init__(self, parent):
         super(RunesArea, self).__init__(parent)
         self.setObjectName("runesArea")
-        self.setGeometry(QtCore.QRect(scrollAreaWidth + 20, windowHeight*0.6, (windowWidth*0.4)-30, windowHeight*0.4-10))
-        self.keystone = QtWidgets.QLabel()
+        self.width = (windowWidth * 0.4) - 30
+        self.height = windowHeight * 0.5 - 10
+        self._rect = QtCore.QRect(scrollAreaWidth + 20, windowHeight * 0.5, self.width, self.height)
+        self.setGeometry(self._rect)
+
+        # PrimaryLayout is the vertical which contains primary runes, Secondary is for secondary runes + the stat runes
+        self.primaryLayoutWidget = QtWidgets.QWidget(self)
+        self.primaryLayoutWidget.setObjectName("primaryLayoutWidget")
+        self.primaryLayoutWidget.setGeometry(QtCore.QRect(self.width * 0.2, 20, 81, self.height * 0.95))
+        self.primaryLayout = QtWidgets.QVBoxLayout(self.primaryLayoutWidget)
+        self.primaryLayout.setObjectName("primaryLayout")
+        self.primaryLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.secondaryLayoutWidget = QtWidgets.QWidget(self)
+        self.secondaryLayoutWidget.setObjectName("secondaryLayoutWidget")
+        self.secondaryLayoutWidget.setGeometry(QtCore.QRect(self.width*0.6, 20, 81, self.height * 0.95))
+        self.secondaryLayout = QtWidgets.QVBoxLayout(self.secondaryLayoutWidget)
+        self.secondaryLayout.setObjectName("secondaryLayout")
+        self.secondaryLayout.setContentsMargins(0, 0, 0, 0)
+
+        # First, generate the labels for each rune. Do this to have reference to the runes, to change it whenever user changes their champion
+        self.runeLabels = []
+        for i in range(11):
+            if i < 5:
+                rune = RuneIcon(50, self.primaryLayoutWidget)
+                self.runeLabels.append(rune)
+                self.primaryLayout.addWidget(rune)
+            else:
+                rune = RuneIcon(50, self.secondaryLayoutWidget)
+                self.runeLabels.append(rune)
+                self.secondaryLayout.addWidget(rune)
+
+    # For each label in runeLabels, change it to match currentRunes
+    def changeRunes(self, currentRunes):
+        for i in range(11):
+            # The stat runes are prefixed by the word 'stat' before their rune number, hence handle using if condition.
+            if i < 8:
+                pixmap = QtGui.QPixmap("assets/runes/{0}.png".format(currentRunes[i]))
+            else:
+                pixmap = QtGui.QPixmap("assets/runes/Stat{0}.png".format(currentRunes[i]))
+            self.runeLabels[i].changeImage(pixmap)
+
+        # Not the best practice, but works for now. Should instead do some threading I think.
+        self.hide()
+        self.show()
 
 class ChampionSearchArea(QtWidgets.QScrollArea):
     def __init__(self, parent):
@@ -46,9 +88,16 @@ class ChampionSearchArea(QtWidgets.QScrollArea):
     # Used when filtering view to match number of rows needed
     def updateGeometry(self, totalRows):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, scrollAreaWidth - 2, 130*totalRows))
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 49, 90*totalRows))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, scrollAreaWidth - 15, 90*totalRows))
 
-class Ui_MainWindow(object):
+class Ui_MainWindow(QtWidgets.QWidget):
+    runesChanged = QtCore.pyqtSignal(list)
+
+    def __init__(self, MainWindow, filterChampions, getRunes):
+        super().__init__()
+        self.setupUi(MainWindow, filterChampions, getRunes)
+        self.runesChanged.connect(self.groupbox.changeRunes)
+
     def setupUi(self, MainWindow, filterChampions, getRunes):
         MainWindow.setObjectName("Duc's ARAM Assistant")
         MainWindow.resize(windowWidth, windowHeight)
@@ -56,6 +105,8 @@ class Ui_MainWindow(object):
         # Helper funcs that use funcs from other file
         self.filterChampions = filterChampions
         self.getRunes = getRunes
+
+        self.currentRunes = []
 
         # Central for when choosing runes
         self.centralwidgetRunes = QtWidgets.QWidget(MainWindow)
@@ -78,7 +129,7 @@ class Ui_MainWindow(object):
         self.championInput.textChanged.connect(lambda: self.handleInputChange(self.championInput.text()))
         self.championInput.returnPressed.connect(lambda: self.handleInputEnter(self.championInput.text()))
 
-        # GroupBox area, used to show runes itself
+        # GroupBox area, used to show runes itself. Updates when current runes changes
         self.groupbox = RunesArea(self.centralwidgetRunes)
 
         # MenuBar, needed for some reason.
@@ -115,8 +166,6 @@ class Ui_MainWindow(object):
             return
 
         # Determine number of rows and columns needed, given total filteredChampions
-        # totalColumns = int(math.sqrt(len(filteredChampions)))
-        # totalRows = int(math.ceil(len(filteredChampions) / float(totalColumns)))
         totalColumns = 7
         totalRows = int(math.ceil(len(filteredChampions) / totalColumns))
         self.scrollArea.updateGeometry(totalRows)
@@ -134,7 +183,7 @@ class Ui_MainWindow(object):
                 currentChampionRow.append(championName)
             
             pixmap = QtGui.QPixmap("assets/champions/{0}Square.png".format(championName))
-            btn = ChampionButton(champ, self.getRunes, pixmap)
+            btn = ChampionButton(champ, self.getRunes, self.groupbox, pixmap)
             self.scrollArea.addWidget(btn, currentRow, currentCol)
             currentCol += 1
 
@@ -157,30 +206,43 @@ class Ui_MainWindow(object):
             currentCol += 1
 
     def handleInputEnter(self, input):
-        currentChampion = self.getRunes(input)
-        print(currentChampion)
+        returnDict = self.getRunes(input)
+        currentChampion = next(iter(returnDict))
+        currentRunes = returnDict[currentChampion]
+        self.runesChanged.emit(currentRunes)
 
 class RuneIcon(QtWidgets.QLabel):
-    def __init__(self, parent):
+    def __init__(self, length, parent):
         super(RuneIcon, self).__init__(parent)
+        self.length = length
         self.pixmap = None
+        self.setMinimumSize(QtCore.QSize(length, length))
+        self.setMaximumSize(QtCore.QSize(length, length))
 
     def changeImage(self, pixmap):
         self.pixmap = pixmap
 
     def paintEvent(self, event):
+        if self.pixmap is None:
+            return
         painter = QtGui.QPainter(self)
         painter.drawPixmap(self.rect(), self.pixmap)
 
     def sizeHint(self):
-        return self.pixmap.size()
+        if self.pixmap is not None:
+            return self.pixmap.size()
+        else:
+            return QtCore.QSize(self.length, self.length)
         
 class ChampionButton(QtWidgets.QPushButton):
-    def __init__(self, champion, getRunes, pixmap, parent=None):
+    runesChanged = QtCore.pyqtSignal(list)
+
+    def __init__(self, champion, getRunes, groupBox, pixmap, parent=None):
         super(ChampionButton, self).__init__(parent)
         self.length = 60
         self.champion = champion
         self.getRunes = getRunes
+        self.groupbox = groupBox
         self.pixmap = pixmap
 
         self.setText(champion)
@@ -188,6 +250,7 @@ class ChampionButton(QtWidgets.QPushButton):
         self.clicked.connect(self.handleClick)
         self.setFixedWidth(self.length)
         self.setFixedHeight(self.length)
+        self.runesChanged.connect(self.groupbox.changeRunes)
 
     def handleTooltip():
         if True:
@@ -201,4 +264,8 @@ class ChampionButton(QtWidgets.QPushButton):
         return self.pixmap.size()
 
     def handleClick(self):
-        self.getRunes(self.champion.lower())
+        returnDict = self.getRunes(self.champion.lower())
+        currentChampion = next(iter(returnDict))
+        currentRunes = returnDict[currentChampion]
+        self.runesChanged.emit(currentRunes)
+

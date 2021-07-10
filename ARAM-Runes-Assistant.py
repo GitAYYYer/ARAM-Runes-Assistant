@@ -1,8 +1,4 @@
-# Program to get a champion name, then construct a reference URL to send to Mobafire and retrieve runes.
-# Example URL:
-# https://www.mobafire.com/league-of-legends/rune-page-planner#&rune=Precision:1:16:19:22::Inspiration:52:56:::Shards:1:1:4
 import xlrd
-import webbrowser
 import win32gui
 import win32con
 import sys
@@ -13,9 +9,6 @@ from UI_Window import Ui_MainWindow
 # IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Give the file path of the file you want to read from:
 fileName = "Champion-Runes-Old-Format.xls"
-# Give the file path of your Chrome:
-# If you're using windows, make sure to use forward slashes '/' and to append ' %s' at the end of your path.
-chromePath = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
 
 # To open Excel Workbook 
 workbook = xlrd.open_workbook(fileName) 
@@ -93,25 +86,19 @@ def getRunes(championNameInput):
                 stat1 = int(sheet.cell_value(i, 9))
                 stat2 = int(sheet.cell_value(i, 10))
                 stat3 = int(sheet.cell_value(i, 11))
+                runesList = []
+                runesList.extend([primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3])
 
-                # Gets chrome tabs
-                hwnd = win32gui.GetForegroundWindow()
-                omniboxHwnd = win32gui.FindWindowEx(hwnd, 0, 'Chrome_OmniboxView', None)
-
-                baseURL = 'https://www.mobafire.com/league-of-legends/rune-page-planner#&rune={}:{}:{}:{}:{}::{}:{}:{}:::Shards:{}:{}:{}'
-                newURL = baseURL.format(primaryTree, keyStone, topRune, midRune, bottomRune, secondaryTree, secondaryR1, secondaryR2, stat1, stat2, stat3)
-                webbrowser.get(chromePath).open(newURL)
-
-                return championNameInput
+                return {championNameInput: runesList}
     return None
         
 if __name__ == '__main__':
     # First, load all the champions
     loadChampions()
 
+    # Create the window
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow, filterChampions, getRunes)
+    ui = Ui_MainWindow(MainWindow, filterChampions, getRunes)
     MainWindow.show()
     sys.exit(app.exec_())
