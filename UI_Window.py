@@ -6,7 +6,7 @@ currentChampion = ""
 
 global windowWidth, windowHeight
 windowWidth = 1000
-windowHeight = 800
+windowHeight = 900
 
 global scrollAreaWidth, scrollAreaHeight
 scrollAreaWidth = windowWidth * 0.6
@@ -42,12 +42,17 @@ class RunesArea(QtWidgets.QGroupBox):
         # First, generate the labels for each rune. Do this to have reference to the runes, to change it whenever user changes their champion
         self.runeLabels = []
         for i in range(11):
+            if i == 1:
+                runeIconSize = 50
+            else:
+                runeIconSize = 50
+
             if i < 5:
-                rune = RuneIcon(50, self.primaryLayoutWidget)
+                rune = RuneIcon(runeIconSize, self.primaryLayoutWidget)
                 self.runeLabels.append(rune)
                 self.primaryLayout.addWidget(rune)
             else:
-                rune = RuneIcon(50, self.secondaryLayoutWidget)
+                rune = RuneIcon(runeIconSize, self.secondaryLayoutWidget)
                 self.runeLabels.append(rune)
                 self.secondaryLayout.addWidget(rune)
 
@@ -210,6 +215,8 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     def handleInputEnter(self, input):
         returnDict = self.getRunes(input)
+        if returnDict is None:
+            return
         currentChampion = next(iter(returnDict))
         currentRunes = returnDict[currentChampion]
         self.runesChanged.emit(currentRunes)
@@ -217,6 +224,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
 class RuneIcon(QtWidgets.QLabel):
     def __init__(self, length, parent):
         super(RuneIcon, self).__init__(parent)
+        self.setObjectName("runeIcon")
         self.length = length
         self.pixmap = None
         self.setMinimumSize(QtCore.QSize(length, length))
