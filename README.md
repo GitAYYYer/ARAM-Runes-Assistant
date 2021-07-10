@@ -1,5 +1,6 @@
 # ARAM-Runes-Assistant
-A quick and easy-to-use GUI to be your assistant for deciding what runes you should take on a champion, for the ARAM gamemode in League of Legends :)
+A quick and easy-to-use GUI to be your assistant for deciding what runes you should take on a champion, for the ARAM gamemode in League of Legends :) 
+
 This was designed to help my friends play League of Legends better, and is all made with personal preference in mind.
 
 ## Setup
@@ -31,7 +32,8 @@ When inputting a champion to get runes for, the program will search for the cham
     - This one seems much more complicated and honestly would take a very long time to collate since it's so specific, but would still be very helpful.
 
 ## Credit
-Credit goes to 'Brent Vollebregt' at PyTutorials for making an application to convert Python files to .exe very easily. Video can be found at https://www.youtube.com/watch?v=OZSZHmWSOeM&list=PLRFfcI5ac25sL4zRlO3VpkSIbM021qRIa&index=15.
+Credit goes to 'Brent Vollebregt' at PyTutorials for making an application to convert Python files to .exe very easily. Video can be found at https://www.youtube.com/watch?v=OZSZHmWSOeM&list=PLRFfcI5ac25sL4zRlO3VpkSIbM021qRIa&index=15. 
+
 Thanks to Eddy for some ideas and Adam for photoshopping some of the icons.
 
 ## Remember
