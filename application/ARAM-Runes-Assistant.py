@@ -3,8 +3,8 @@ import win32gui
 import win32con
 import sys
 from difflib import SequenceMatcher
-from PyQt5 import QtCore, QtGui, QtWidgets
-from UI_Window import Ui_MainWindow
+from PyQt5 import QtWidgets
+from ui.UI_Window import Ui_MainWindow
 
 # IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Give the file path of the file you want to read from:
